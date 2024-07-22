@@ -6,6 +6,9 @@ hexo.extend.filter.register('before_post_render', function(data) {
   const endTag = '--picture_wall_end--';
 
   const regex = new RegExp(`${startTag}[\\s\\S]*?${endTag}`, 'g');
+  const postDate = data.date.format('YYYY/MM/DD');
+  const postFileName = data.slug;
+
 
   data.content = data.content.replace(regex, match => {
     const pictures = match
@@ -25,9 +28,10 @@ hexo.extend.filter.register('before_post_render', function(data) {
     let pictureWallHtml = '<div class="picture-wall">';
 
     pictureArray.forEach(picture => {
-      const srcMatch = picture.match(/!\[.*?\]\((.*?)\)/);
+      const srcMatch = picture.match(/!\[.*?\]\((.*?)\s+\"(.*?)\"\)/);
       if (srcMatch && srcMatch[1]) {
-        pictureWallHtml += `<div class="picture-wall-item"><img src="${srcMatch[1]}" alt=""></div>`;
+        const imagePath = `/${postDate}/${postFileName}/${srcMatch[1]}`;
+        pictureWallHtml += `<div class="picture-wall-item"><img src="${imagePath}" alt="${srcMatch[0]}""></div>`;
       }
     });
 
