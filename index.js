@@ -9,7 +9,7 @@ hexo.extend.filter.register('before_post_render', function(data) {
   const postDate = data.date.format('YYYY/MM/DD');
   const postFileName = data.slug;
 
-
+  // Process picture wall
   data.content = data.content.replace(regex, match => {
     const pictures = match
       .replace(startTag, '')
@@ -18,28 +18,26 @@ hexo.extend.filter.register('before_post_render', function(data) {
 
     const pictureArray = pictures.split('\n').map(item => item.trim()).filter(item => item);
 
-    pictureArray.forEach(picture => {
-        const srcMatch = picture.match(/!\[.*?\]\((.*?)\s+\"(.*?)\"\)/);
-        if (srcMatch && srcMatch[1]) {
-        console.log(`Found image: ${srcMatch[1]}, title: ${srcMatch[2]}`);  // 输出匹配到的图片路径和标题
-        }
-    });
-
     let pictureWallHtml = '<div class="picture-wall">';
 
     pictureArray.forEach(picture => {
       const srcMatch = picture.match(/!\[.*?\]\((.*?)\s+\"(.*?)\"\)/);
       if (srcMatch && srcMatch[1]) {
         const imagePath = `/${postDate}/${postFileName}/${srcMatch[1]}`;
-        pictureWallHtml += `<div class="picture-wall-item"><img src="${imagePath}" alt="${srcMatch[0]}""></div>`;
+        pictureWallHtml += `<div class="picture-wall-item"><img src="${imagePath}" alt="${srcMatch[2]}" title="${srcMatch[2]}"></div>`;
       }
     });
 
     pictureWallHtml += '</div>';
 
-    console.log(pictureWallHtml);
-
     return pictureWallHtml;
+  });
+
+  // Process other images
+  const imageRegex = /!\[([^\]]*)\]\(([^\s\)]+)(?:\s+"([^"]*)")?\)/g;
+  data.content = data.content.replace(imageRegex, (match, alt, src, title) => {
+    const imagePath = `/${postDate}/${postFileName}/${src}`;
+    return `<div class="post-content"><img src="${imagePath}" alt="${alt || ''}" title="${title || alt || ''}"></div>`
   });
 
   return data;
